@@ -12,8 +12,9 @@ type Credentials struct {
 	ChannelName string `json:"channel_name"`
 }
 
-func LoadCredentials() (*Credentials, error) {
-	file, err := os.Open("credentials.json")
+// LoadCredentials loads credentials from credentials.json
+func LoadCredentials(path string) (*Credentials, error) {
+	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}

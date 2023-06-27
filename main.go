@@ -1,63 +1,60 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
 	"jake/method/dev/src/bot"
+	"jake/method/dev/src/bot/credentials"
 	"jake/method/dev/src/chuck"
-	"os"
+	"log"
 	"strings"
-	"time"
 )
 
+const TCP string = "tcp"
+const URL string = "irc.chat.twitch.tv:6667"
 
 func main() {
-
-	// connect to channel
-	conn, err := bot.Connect()
+	// Load credentials from file
+	creds, err := credentials.LoadCredentials("src/bot/credentials/credentials.json")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to connect: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("LoadCredentials error: %v", err)
 	}
 
-	reader := bufio.NewReader(conn.R)
-
-	for {
-		// read in line from terminal
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to read: %s\n", err)
-			os.Exit(1)
-		}
-
-		line = strings.TrimSuffix(line, "\r\n")
-
-		// if line starts with PING, send PONG
-		if strings.HasPrefix(line, "PING") {
-			_, err = conn.Cmd("PONG %s", strings.Split(line, " ")[1])
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to write PONG: %s\n", err)
-				os.Exit(1)
-			}
-			continue
-		}
-
-		if !strings.Contains(line, "PRIVMSG") {
-			continue
-		}
-
-		msg := bot.ParseMessage(line)
-		// print message to terminal using time format RFC3339
-		fmt.Printf("[%s] %s: %s\n", time.Now().Format(time.RFC3339), msg.User, msg.Content)
-
-		// if message is "!chucknorris", send joke to channel
-		if msg.Content == chuck.ChuckMessage {
-			joke := chuck.GetJoke()
-			_, err = conn.Cmd("PRIVMSG #%s :%s", "YOUR_CHANNEL_NAME", joke)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Failed to write message: %s\n", err)
-				os.Exit(1)
-			}
-		}
+	// Connect to the Twitch IRC server
+	conn, err := bot.Connect(*creds, URL)
+	if err != nil {
+		log.Fatalf("Connect error: %v", err)
 	}
+	defer conn.Conn.Close()
+
+	reader := conn.R
+
+	// Start a goroutine with each connection to read incoming messages
+	go func() {
+		for {
+			message, err := reader.ReadString('\n')
+			if err != nil {
+				log.Printf("ReadString error: %v", err)
+				continue
+			}
+
+			// Keep Server Alive w/ PING/PONG
+			if "PING :" == message[:5] {
+				conn.Cmd("PONG :" + message[5:])
+			}
+
+			// Check if the message contains the word "!chucknorris", ignoring case
+			if strings.Contains(strings.ToLower(message), chuck.ChuckMessage) {
+				// Retrieve a joke from the Chuck Norris API
+				joke := chuck.GetJoke(chuck.ChuckApi)
+
+				// Send the joke to the channel
+				err = conn.SendMessage("#"+creds.ChannelName, joke)
+				if err != nil {
+					log.Printf("SendMessage error: %v", err)
+				}
+			}
+		}
+	}()
+
+	// Prevent main from exiting
+	select {}
 }

@@ -13,8 +13,9 @@ type Joke struct {
 	Value string `json:"value"`
 }
 
-func GetJoke() string {
-	resp, err := http.Get(ChuckApi)
+// GetJoke retrieves a joke from the Chuck Norris API
+func GetJoke(apiURL string) string {
+	resp, err := http.Get(apiURL)
 	if err != nil {
 		return "Failed to retrieve joke: " + err.Error()
 	}
