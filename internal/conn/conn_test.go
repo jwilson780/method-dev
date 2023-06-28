@@ -1,4 +1,4 @@
-package bot
+package conn
 
 import (
 	"bufio"
@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"jake/method/dev/src/bot/credentials"
+	"jake/method/dev/internal/conn/credentials"
 )
 
 // would most likely skip this test in production or in CI
@@ -17,7 +17,7 @@ func TestConnect(t *testing.T) {
 	// Note: you will need to gen the cert.pem and key.pem files yourself in order to run this test
 	cer, err := tls.LoadX509KeyPair("cert.pem", "key.pem") // Provide your own self-signed certificate and key
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(err) // make sure key doesn't have a passkey
 	}
 	config := &tls.Config{Certificates: []tls.Certificate{cer}}
 	ln, err := tls.Listen(TCP, "127.0.0.1:0", config)

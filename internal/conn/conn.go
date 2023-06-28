@@ -1,10 +1,10 @@
-package bot
+package conn
 
 import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
-	"jake/method/dev/src/bot/credentials"
+	"jake/method/dev/internal/conn/credentials"
 	"net"
 	"time"
 )

@@ -43,7 +43,19 @@ The bot runs asynchronously, using goroutines to handle incoming messages and AP
 handles PING/PONG messages from the Twitch server to avoid disconnection. It is designed to comply with the Twitch API 
 rate limits.
 
+## Testing 
+The bot has a suite of unit tests that can be run using the Go test command:
 
+```bash 
+go test -v ./...
+```
+
+In order to run the `conn_test.go` file you will need to create a certificate and key file for the bot to use. 
+You can do this by running the following command in teh `conn` directory:
+
+```bash     
+openssl req -x509 -nodes -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365
+```
 ## License
 
 [MIT](LICENSE)

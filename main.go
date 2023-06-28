@@ -1,27 +1,31 @@
 package main
 
 import (
-	"jake/method/dev/src/bot"
-	"jake/method/dev/src/bot/credentials"
-	"jake/method/dev/src/chuck"
+	"jake/method/dev/internal/chuck"
+	"jake/method/dev/internal/conn"
+	"jake/method/dev/internal/conn/credentials"
 	"log"
 	"strings"
 )
 
-const tlsUrl string = "irc.chat.twitch.tv:6697"
-const chuckApi string = "https://api.chucknorris.io/jokes/random"
-const chuckMessage string = "!chucknorris"
-const credentialsPath string = "src/bot/credentials/credentials.json"
+const (
+	tlsUrl          string = "irc.chat.twitch.tv:6697"
+	chuckApi        string = "https://api.chucknorris.io/jokes/random"
+	chuckMessage    string = "!chucknorris"
+	credentialsPath string = "internal/conn/credentials/credentials.json"
+	ping string = "PING"
+	pongMessage string = "PONG :tmi.twitch.tv"
+)
 
 func main() {
-	// Load credentials from file
+	// Load credentials from local file
 	creds, err := credentials.LoadCredentials(credentialsPath)
 	if err != nil {
 		log.Fatalf("LoadCredentials error: %v", err)
 	}
 
 	// Connect to the Twitch IRC server
-	conn, err := bot.Connect(*creds, tlsUrl)
+	conn, err := conn.Connect(*creds, tlsUrl)
 	if err != nil {
 		log.Fatalf("Connect error: %v", err)
 	}
@@ -38,8 +42,12 @@ func main() {
 			message = strings.TrimSuffix(message, "\n")
 			log.Printf("Received: %s", message)
 
-			if strings.Contains(message, "PING") {
-				conn.Cmd("PONG :tmi.twitch.tv")
+			if strings.Contains(message, ping) {
+				_, err := conn.Cmd(pongMessage)
+				if err != nil {
+					log.Printf("Failed to send PONG message: %v", err)
+					return
+				}
 				log.Println("Responded to PING with PONG")
 			}
 
@@ -50,9 +58,10 @@ func main() {
 					err := conn.SendMessage("#"+creds.ChannelName, joke)
 					if err != nil {
 						log.Printf("Failed to send message: %v", err)
-					} else {
-						log.Printf("Sent: %s", joke)
+						return
 					}
+					log.Printf("Sent: %s", joke)
+
 				}()
 			}
 		}
