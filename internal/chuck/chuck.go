@@ -2,6 +2,8 @@ package chuck
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -11,10 +13,10 @@ type Joke struct {
 }
 
 // GetJoke retrieves a joke from the Chuck Norris API
-func GetJoke(apiURL string) string {
+func GetJoke(apiURL string) (string, error) {
 	resp, err := http.Get(apiURL)
 	if err != nil {
-		return "Failed to retrieve joke: " + err.Error()
+		return "", errors.New(fmt.Sprint("Failed to retrieve joke:", err.Error()))
 	}
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
@@ -22,7 +24,7 @@ func GetJoke(apiURL string) string {
 	var joke Joke
 	err = json.Unmarshal(body, &joke)
 	if err != nil {
-		return "Failed to parse joke: " + err.Error()
+		return "", errors.New(fmt.Sprint("Failed to parse joke:", err.Error()))
 	}
-	return joke.Value
+	return joke.Value, nil
 }

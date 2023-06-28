@@ -13,8 +13,8 @@ const (
 	chuckApi        string = "https://api.chucknorris.io/jokes/random"
 	chuckMessage    string = "!chucknorris"
 	credentialsPath string = "internal/conn/credentials/credentials.json"
-	ping string = "PING"
-	pongMessage string = "PONG :tmi.twitch.tv"
+	ping            string = "PING"
+	pongMessage     string = "PONG :tmi.twitch.tv"
 )
 
 func main() {
@@ -54,8 +54,12 @@ func main() {
 			if strings.Contains(message, chuckMessage) {
 				go func() {
 					log.Printf("Received %s command", chuckMessage)
-					joke := chuck.GetJoke(chuckApi)
-					err := conn.SendMessage("#"+creds.ChannelName, joke)
+					joke, err := chuck.GetJoke(chuckApi)
+					if err != nil {
+						log.Printf("Failed to get joke: %v", err)
+						return
+					}
+					err = conn.SendMessage("#"+creds.ChannelName, joke)
 					if err != nil {
 						log.Printf("Failed to send message: %v", err)
 						return

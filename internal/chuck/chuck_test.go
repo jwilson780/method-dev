@@ -23,7 +23,7 @@ func TestGetJoke(t *testing.T) {
 	defer ts.Close()
 
 	// EXECUTE
-	joke := GetJoke(ts.URL)
+	joke, _ := GetJoke(ts.URL)
 
 	// VERIFY
 	// didn't want to use any external libs but would normally use https://github.com/stretchr/testify to assert
