@@ -28,7 +28,8 @@ func TestConnect(t *testing.T) {
 		for {
 			conn, err := ln.Accept()
 			if err != nil {
-				t.Fatal(err)
+				t.Error(err)
+				return
 			}
 			go handleConnection(conn, t)
 		}
@@ -70,6 +71,10 @@ func handleConnection(conn net.Conn, t *testing.T) {
 			t.Errorf("Read error: %v", err)
 			return
 		}
-		conn.Write(buf[:n])
+		_, err = conn.Write(buf[:n])
+		if err != nil {
+			t.Errorf("Write error: %v", err)
+			return
+		}
 	}
 }

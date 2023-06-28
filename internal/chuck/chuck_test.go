@@ -18,7 +18,11 @@ func TestGetJoke(t *testing.T) {
 		}
 
 		// Write mock response
-		w.Write([]byte(`{"value": "This is a test joke."}`))
+		_, err := w.Write([]byte(`{"value": "This is a test joke."}`))
+		if err != nil {
+			t.Errorf("Failed to write response: %v", err)
+			return
+		}
 	}))
 	defer ts.Close()
 
