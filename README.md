@@ -39,7 +39,7 @@ The bot uses the standard Go libraries to connect to the Twitch IRC server over 
 channel and listens for messages. If a message matches the `!chucknorris` command, the bot fetches a random fact from 
 the Chuck Norris API and sends it to the channel.
 
-The bot runs asynchronously, using goroutines and channels to handle incoming messages and API responses. It also 
+The bot runs asynchronously, using goroutines to handle incoming messages and API responses. It also 
 handles PING/PONG messages from the Twitch server to avoid disconnection. It is designed to comply with the Twitch API 
 rate limits.
 
