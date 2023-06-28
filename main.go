@@ -8,49 +8,52 @@ import (
 	"strings"
 )
 
-const TCP string = "tcp"
-const URL string = "irc.chat.twitch.tv:6667"
+const tlsUrl string = "irc.chat.twitch.tv:6697"
+const chuckApi string = "https://api.chucknorris.io/jokes/random"
+const chuckMessage string = "!chucknorris"
+const credentialsPath string = "src/bot/credentials/credentials.json"
 
 func main() {
 	// Load credentials from file
-	creds, err := credentials.LoadCredentials("src/bot/credentials/credentials.json")
+	creds, err := credentials.LoadCredentials(credentialsPath)
 	if err != nil {
 		log.Fatalf("LoadCredentials error: %v", err)
 	}
 
 	// Connect to the Twitch IRC server
-	conn, err := bot.Connect(*creds, URL)
+	conn, err := bot.Connect(*creds, tlsUrl)
 	if err != nil {
 		log.Fatalf("Connect error: %v", err)
 	}
 	defer conn.Conn.Close()
-
-	reader := conn.R
-
 	// Start a goroutine with each connection to read incoming messages
 	go func() {
 		for {
-			message, err := reader.ReadString('\n')
+			message, err := conn.R.ReadString('\n')
 			if err != nil {
-				log.Printf("ReadString error: %v", err)
-				continue
+				log.Printf("Failed to read message: %v", err)
+				return
 			}
 
-			// Keep Server Alive w/ PING/PONG
-			if "PING :" == message[:5] {
-				conn.Cmd("PONG :" + message[5:])
+			message = strings.TrimSuffix(message, "\n")
+			log.Printf("Received: %s", message)
+
+			if strings.Contains(message, "PING") {
+				conn.Cmd("PONG :tmi.twitch.tv")
+				log.Println("Responded to PING with PONG")
 			}
 
-			// Check if the message contains the word "!chucknorris", ignoring case
-			if strings.Contains(strings.ToLower(message), chuck.ChuckMessage) {
-				// Retrieve a joke from the Chuck Norris API
-				joke := chuck.GetJoke(chuck.ChuckApi)
-
-				// Send the joke to the channel
-				err = conn.SendMessage("#"+creds.ChannelName, joke)
-				if err != nil {
-					log.Printf("SendMessage error: %v", err)
-				}
+			if strings.Contains(message, chuckMessage) {
+				go func() {
+					log.Printf("Received %s command", chuckMessage)
+					joke := chuck.GetJoke(chuckApi)
+					err := conn.SendMessage("#"+creds.ChannelName, joke)
+					if err != nil {
+						log.Printf("Failed to send message: %v", err)
+					} else {
+						log.Printf("Sent: %s", joke)
+					}
+				}()
 			}
 		}
 	}()

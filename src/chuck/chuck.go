@@ -6,9 +6,6 @@ import (
 	"net/http"
 )
 
-const ChuckApi string = "https://api.chucknorris.io/jokes/random"
-const ChuckMessage string = "!chucknorris"
-
 type Joke struct {
 	Value string `json:"value"`
 }

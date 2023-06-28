@@ -26,3 +26,5 @@
 go.work
 
 src/bot/credentials/credentials.json
+
+dev
