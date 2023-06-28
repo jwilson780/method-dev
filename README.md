@@ -7,25 +7,26 @@ Before you start, please ensure you have Go installed on your computer. You can 
 [here](https://go.dev/dl/).
 
 ### Prerequisites
-You should replace the placeholders in the `credentials.json.example` file with your actual Twitch username, OAuth token, and 
-channel name. Here's an example of what it might look like:
+You should copy the placeholders in the `credentials.json.example` into `credentials.json` file with your actual 
+Twitch username, OAuth token, and channel name. Here's an example of what it might look like:
 
 ```json
 {
-    "username": "yourusername",
-    "oauth_token": "youroauthtoken",
-    "channel_name": "yourchannelname"
+    "username": "mytwitchusername",
+    "oauth_token": "oauth:myoauthtoken",
+    "channel_name": "mytwitchchannel"
 }
 ```
-Store this file as `credentials.json` in that same directory. The bot will use these credentials to connect to the Twitch. 
-Remember to never share this file, as it contains your sensitive data. It is ignored by git in the `.gitignore` file.
+The bot will use these credentials to connect to the Twitch api. _Remember to never share this file, as it contains your 
+sensitive data_. It is ignored by git in the `.gitignore` file.
 
-To build the bot, navigate to root of the project and use the Go build command:
+To build the project, navigate to root of the project and use the Go build command:
 
 ```bash
 go build
 ```
 This will create an executable file in the same directory.
+
 ## Usage
 ### Running
 To start the bot, simply run the executable that you built in the installation step:
