@@ -32,7 +32,6 @@ To start the bot, simply run the executable that you built in the installation s
 ```bash
 ./dev
 ```
-Replace your-executable-name with the name of the executable that was created when you ran go build.
 
 ### How it works
 The bot uses the standard Go libraries to connect to the Twitch IRC server over SSL. It then joins the specified 
